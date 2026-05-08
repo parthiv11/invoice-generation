@@ -140,7 +140,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
 /* ─── INVOICE PREVIEW ────────────────────────── */
 .inv{background:#fff;width:720px;min-width:720px;font-family:Arial,Helvetica,sans-serif;font-size:10pt;box-shadow:0 8px 40px rgba(0,0,0,.12);border:1px solid #b8c4d4}
 .i-title{background:var(--ib);color:#fff;text-align:center;padding:9pt 0;font-size:14pt;font-weight:700;letter-spacing:4pt}
-.i-orig{text-align:right;font-size:7.5pt;font-weight:700;color:#C65911;padding:2.5pt 10pt;border-bottom:1pt solid #cdd5e0}
+.i-orig{text-align:center;font-size:7.5pt;font-weight:700;color:#C65911;padding:2.5pt 10pt;border-bottom:1pt solid #cdd5e0;letter-spacing:.5pt}
 .i-parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1pt solid #cdd5e0}
 .i-pty{padding:8pt 10pt}.i-pty+.i-pty{border-left:1pt solid #cdd5e0}
 .i-ph{background:var(--ib);color:#fff;margin:-8pt -10pt 6pt;padding:3pt 10pt;font-size:8pt;font-weight:700;letter-spacing:1.5pt}
@@ -175,8 +175,11 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
 .i-prll{min-width:90pt;padding:3.5pt 10pt;font-size:8pt;font-weight:700;color:var(--ib);flex-shrink:0}
 .i-prv{flex:1;padding:3.5pt 10pt;font-size:8.5pt}
 .i-sig{display:grid;grid-template-columns:1fr 1fr;border-top:1pt solid #cdd5e0}
-.i-sl{padding:22pt 10pt 8pt;text-align:center;font-size:8.5pt;font-weight:700;background:var(--igr);border-right:1pt solid #cdd5e0}
-.i-sr{padding:22pt 10pt 8pt;text-align:center;font-size:8.5pt;font-weight:700;background:var(--isky)}
+.i-sb{min-height:70pt;display:flex;flex-direction:column;justify-content:flex-end}
+.i-sb+.i-sb{border-left:1pt solid #cdd5e0}
+.i-sb.left{background:var(--igr)}
+.i-sb.right{background:var(--isky)}
+.i-sbl{padding:6pt 10pt 8pt;text-align:center;font-size:8.5pt;font-weight:700}
 .i-foot{text-align:center;padding:6pt;font-size:7.5pt;color:#666;background:#f8f9fb;border-top:1pt solid #cdd5e0}
 </style>
 </head>
@@ -606,7 +609,10 @@ function render(){
     <div class="i-pr"><div class="i-prll">Account No.</div><div class="i-prv">${g("pay_acc")}</div></div>
     <div class="i-pr"><div class="i-prll">IFSC Code</div><div class="i-prv">${g("pay_ifsc")}</div></div>
     <div class="i-pr"><div class="i-prll">Comments</div><div class="i-prv">${g("pay_cmts")}</div></div>
-    <div class="i-sig"><div class="i-sl">Authorised Signatory</div><div class="i-sr">by ${g("sup_name")}</div></div>
+    <div class="i-sig">
+      <div class="i-sb left"><div class="i-sbl">Authorised Signatory</div></div>
+      <div class="i-sb right"><div class="i-sbl">by ${g("sup_name")}</div></div>
+    </div>
     <div class="i-foot">${g("footer_txt")}</div>
   </div>`;
 }
