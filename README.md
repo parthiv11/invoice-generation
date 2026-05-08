@@ -1,6 +1,6 @@
 # 🧾 KISHAN ENTERPRISE — Invoice API + Builder
 
-Send JSON → Get PDF or Excel invoice. Hosted free on Render.com.
+Send JSON → Get PDF or Excel invoice. Deployable on Render and Vercel.
 
 ## Run locally
 ```bash
@@ -32,3 +32,9 @@ curl -X POST http://localhost:3000/api/invoice/pdf \
 4. Select Free plan → Deploy!
 
 Your live URL: `https://your-app.onrender.com`
+
+## Deploy on Vercel
+1. Push to GitHub
+2. vercel.com → Add New Project → import this repo
+3. Keep defaults and deploy (uses `vercel.json`)
+4. Open `https://your-app.vercel.app/api` to verify API
