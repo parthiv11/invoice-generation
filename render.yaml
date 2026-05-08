@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ridhi-invoice-api
+    name: invoice-api
     env: node
     plan: free
     buildCommand: npm install
