@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // ── Docs ──────────────────────────────────────────────────────────────────────
 app.get("/api", (req, res) => res.json({
-  name: "RIDHI ENTERPRISE — Invoice API",
+  name: "KISHAN ENTERPRISE — Invoice API",
   version: "2.0.0",
   endpoints: {
     "GET  /api":              "This help page",
@@ -45,7 +45,7 @@ app.get("/api", (req, res) => res.json({
     comments:        "string",
     footerText:      "string",
   },
-  note: "All unspecified fields fall back to RIDHI ENTERPRISE defaults. Only items[] replaces entirely."
+  note: "All unspecified fields fall back to KISHAN ENTERPRISE defaults. Only items[] replaces entirely."
 }));
 
 app.get("/api/health",   (_, r) => r.json({ status: "ok", ts: new Date().toISOString() }));
