@@ -1,7 +1,7 @@
 {
   "name": "ridhi-invoice-api",
   "version": "2.0.0",
-  "description": "RIDHI ENTERPRISE Invoice Generator — API + Frontend",
+  "description": "KISHAN ENTERPRISE Invoice Generator — API + Frontend",
   "main": "server.js",
   "scripts": { "start": "node server.js" },
   "engines": { "node": ">=18.0.0" },

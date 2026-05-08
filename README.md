@@ -1,4 +1,4 @@
-# 🧾 RIDHI ENTERPRISE — Invoice API + Builder
+# 🧾 KISHAN ENTERPRISE — Invoice API + Builder
 
 Send JSON → Get PDF or Excel invoice. Hosted free on Render.com.
 
