@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RIDHI ENTERPRISE — Invoice Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#edeae4;--panel:#f7f5f2;--card:#fff;
+  --navy:#1a2b4a;--teal:#1e6b7c;--amber:#c96a00;
+  --red:#c0392b;--green:#166534;
+  --border:#ddd8d0;--border2:#ece8e2;
+  --text:#1c1917;--muted:#6b7280;--light:#f0ede8;
+  --ib:#1F3864;--isky:#dbeafe;--igr:#f1f5f9;
+  --f:'Plus Jakarta Sans',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:13px}
+
+/* ─── BAR ─────────────────────────────────────── */
+.bar{display:flex;align-items:center;gap:10px;padding:0 20px;height:54px;background:var(--navy);flex-shrink:0;box-shadow:0 2px 16px rgba(0,0,0,.35);z-index:20}
+.bar-logo{display:flex;align-items:center;gap:9px;color:#fff}
+.bar-logo .ico{width:32px;height:32px;border-radius:7px;background:linear-gradient(135deg,var(--teal),#124555);display:flex;align-items:center;justify-content:center;font-size:15px}
+.bar-logo h1{font-size:14px;font-weight:700}
+.bar-logo small{font-size:10px;color:#94a3b8;display:block}
+.bar-sep{flex:1}
+.bar-kpis{display:flex;gap:18px;padding:0 16px;border-left:1px solid rgba(255,255,255,.1);border-right:1px solid rgba(255,255,255,.1)}
+.kpi .l{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.kpi .v{font-size:13px;font-weight:700;color:#fff;font-family:var(--mono)}
+.kpi .v.g{color:#fbbf24}
+.xbtn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.xbtn:active{transform:scale(.97)}
+.btn-pdf{background:#c65911;color:#fff}.btn-pdf:hover{background:#a04809}
+.btn-xl{background:#166534;color:#fff}.btn-xl:hover{background:#0f4a24}
+.btn-rst{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.14)}.btn-rst:hover{background:rgba(255,255,255,.18)}
+
+/* ─── TABS ─────────────────────────────────────── */
+.tabs{display:flex;padding:0 20px;background:rgba(0,0,0,.22);flex-shrink:0;gap:2px}
+.tab{padding:8px 16px;font-size:12px;font-weight:600;color:#94a3b8;cursor:pointer;border-bottom:2.5px solid transparent;transition:.15s;user-select:none}
+.tab:hover{color:#fff}.tab.on{color:#fff;border-bottom-color:#fbbf24}
+
+/* ─── MAIN ─────────────────────────────────────── */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* ─── EDITOR ───────────────────────────────────── */
+.ed{width:420px;flex-shrink:0;background:var(--panel);border-right:1.5px solid var(--border);overflow-y:auto}
+.ed::-webkit-scrollbar{width:4px}.ed::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+.sec{border-bottom:1.5px solid var(--border2)}
+.sec-hd{display:flex;align-items:center;gap:9px;padding:12px 16px;cursor:pointer;user-select:none;transition:background .12s}
+.sec-hd:hover{background:var(--light)}
+.sec-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sec-ttl{font-size:12.5px;font-weight:700;flex:1}
+.sec-badge{font-size:9.5px;color:var(--muted);background:var(--border2);padding:1.5px 7px;border-radius:20px}
+.sec-arr{font-size:10px;color:var(--muted);transition:transform .2s}
+.sec.on .sec-arr{transform:rotate(90deg)}
+.sec-body{display:none;padding:4px 16px 16px}
+.sec.on .sec-body{display:block}
+
+/* ─── FORM ─────────────────────────────────────── */
+.fg{margin-bottom:9px}
+.fl{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.fi{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:var(--f);font-size:12.5px;background:var(--card);color:var(--text);transition:border-color .14s,box-shadow .14s}
+.fi:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(30,107,124,.12)}
+.gr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.tax-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#eef3f8;padding:9px;border-radius:9px;margin-bottom:8px}
+.tax-c{text-align:center}
+.tax-i{width:100%;padding:7px 4px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:16px;font-weight:600;text-align:center;background:var(--card)}
+.tax-i:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(30,107,124,.12)}
+
+/* ─── ITEMS TABLE ──────────────────────────────── */
+.items-wrap{border-radius:8px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:9px}
+.it{width:100%;border-collapse:collapse;font-size:11px}
+.it th{background:var(--navy);color:#fff;padding:6px 5px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;text-align:center}
+.it td{padding:3px 3px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.it tbody tr:last-child td{border-bottom:none}
+.it tbody tr:hover td{background:#f8f5f2}
+.td-n{text-align:center;font-size:10px;color:var(--muted);width:22px;padding-left:5px!important}
+.td-a{text-align:right;font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--teal);padding-right:6px!important;width:76px}
+.td-x{width:26px;text-align:center}
+.ti2{width:100%;padding:5px 5px;border:1.5px solid transparent;border-radius:5px;font-family:var(--f);font-size:11px;background:transparent;transition:.12s}
+.ti2:focus{outline:none;border-color:var(--teal);background:#fffef8}
+.ti-n{text-align:center;font-family:var(--mono)}
+.xb{width:22px;height:22px;border-radius:5px;border:1px solid #fca5a5;background:#fee2e2;color:var(--red);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;margin:auto;transition:.12s}
+.xb:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.add-b{width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:7px;background:transparent;color:var(--teal);font-family:var(--f);font-size:12px;font-weight:700;cursor:pointer;transition:.14s}
+.add-b:hover{border-color:var(--teal);background:rgba(30,107,124,.05)}
+
+/* ─── SIDEBAR TOTALS ─────────────────────────── */
+.s-tots{background:#eef3f8;border-radius:8px;padding:9px 12px;border:1px solid var(--border);margin-top:9px}
+.st-r{display:flex;justify-content:space-between;align-items:center;padding:3.5px 0;border-bottom:1px solid var(--border2)}
+.st-r:last-child{border-bottom:none;padding-top:6px}
+.st-l{color:var(--muted);font-size:10.5px}
+.st-v{font-family:var(--mono);font-weight:700;font-size:11.5px}
+.st-r.grand .st-l{font-weight:700;color:var(--navy);font-size:12px}
+.st-r.grand .st-v{font-size:14px;color:var(--navy)}
+
+/* ─── DOWNLOAD PANEL ─────────────────────────── */
+.dl-panel{padding:14px 16px;border-top:2px solid var(--border);background:var(--light)}
+.dl-panel-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
+.dl-btns{display:flex;gap:8px}
+.dl-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border-radius:9px;border:none;font-family:var(--f);font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s}
+.dl-btn:active{transform:scale(.97)}
+.dl-pdf{background:#c65911;color:#fff}.dl-pdf:hover{background:#a04809;box-shadow:0 4px 14px rgba(198,89,17,.3)}
+.dl-xl{background:#166534;color:#fff}.dl-xl:hover{background:#0f4a24;box-shadow:0 4px 14px rgba(22,101,52,.3)}
+.dl-btn.loading{opacity:.6;pointer-events:none}
+
+/* ─── STATUS TOAST ───────────────────────────── */
+.toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2);transition:all .3s;transform:translateY(80px);opacity:0}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:#166534}.toast.err{background:#c0392b}.toast.info{background:#1e6b7c}
+
+/* ─── PREVIEW ────────────────────────────────── */
+.preview-wrap{flex:1;overflow:auto;padding:20px;display:flex;align-items:flex-start;justify-content:center;background:var(--bg)}
+.preview-wrap::-webkit-scrollbar{width:5px;height:5px}
+.preview-wrap::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+.preview-lbl{font-size:9.5px;color:var(--muted);text-align:center;margin-bottom:10px;letter-spacing:.6px;text-transform:uppercase}
+
+/* ─── API PANEL ──────────────────────────────── */
+.api-panel{display:none;flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.api-panel.on{display:block}
+.api-card{background:var(--card);border-radius:12px;border:1.5px solid var(--border);padding:20px;margin-bottom:16px;max-width:860px}
+.api-card h2{font-size:15px;font-weight:800;margin-bottom:4px;color:var(--navy)}
+.api-card p{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.55}
+.method{display:inline-block;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:800;font-family:var(--mono);margin-right:4px}
+.GET{background:#dcfce7;color:#166534}.POST{background:#dbeafe;color:#1e3a5f}
+.ep-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border2);flex-wrap:wrap}
+.ep-row:last-child{border-bottom:none}
+.endpoint{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--navy)}
+.ep-desc{font-size:12px;color:var(--muted)}
+.badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#ede9fe;color:#5b21b6}
+.code-block{background:#0f1117;color:#e2e8f0;border-radius:9px;padding:16px;font-family:var(--mono);font-size:11.5px;line-height:1.8;overflow-x:auto;margin-top:10px;position:relative;white-space:pre}
+.kw{color:#93c5fd}.str{color:#86efac}.num{color:#fbbf24}.cm{color:#475569}
+.copy-btn{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:5px;border:1px solid #334155;background:#1e293b;color:#94a3b8;font-size:11px;cursor:pointer;font-family:var(--f);transition:.12s}
+.copy-btn:hover{background:#334155;color:#fff}
+.base-url-badge{display:inline-flex;align-items:center;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:6px 12px;font-family:var(--mono);font-size:12px;color:#166534;gap:8px;margin-bottom:12px;font-weight:600}
+
+/* ─── INVOICE PREVIEW ────────────────────────── */
+.inv{background:#fff;width:720px;min-width:720px;font-family:Arial,Helvetica,sans-serif;font-size:10pt;box-shadow:0 8px 40px rgba(0,0,0,.12);border:1px solid #b8c4d4}
+.i-title{background:var(--ib);color:#fff;text-align:center;padding:9pt 0;font-size:14pt;font-weight:700;letter-spacing:4pt}
+.i-orig{text-align:right;font-size:7.5pt;font-weight:700;color:#C65911;padding:2.5pt 10pt;border-bottom:1pt solid #cdd5e0}
+.i-parties{display:grid;grid-template-columns:1fr 1fr;border-bottom:1pt solid #cdd5e0}
+.i-pty{padding:8pt 10pt}.i-pty+.i-pty{border-left:1pt solid #cdd5e0}
+.i-ph{background:var(--ib);color:#fff;margin:-8pt -10pt 6pt;padding:3pt 10pt;font-size:8pt;font-weight:700;letter-spacing:1.5pt}
+.i-pf{display:flex;gap:5pt;margin:2.5pt 0;align-items:baseline}
+.i-pl{font-weight:700;min-width:46pt;color:var(--ib);font-size:7.5pt;flex-shrink:0}
+.i-pv{font-size:8.5pt;line-height:1.3}
+.i-meta{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1pt solid #cdd5e0}
+.i-mc{padding:4pt 10pt;border-right:1pt solid #cdd5e0}.i-mc:last-child{border-right:none}
+.i-ml{font-size:7pt;font-weight:700;color:var(--ib);text-transform:uppercase;letter-spacing:.5pt}
+.i-mv{font-size:9.5pt;font-weight:700;margin-top:1pt}
+.i-tbl{width:100%;border-collapse:collapse}
+.i-tbl th{background:var(--ib);color:#fff;padding:5pt 6pt;font-size:8pt;font-weight:700;text-align:center;border:1pt solid #2d4f8a}
+.i-tbl th.tl{text-align:left}
+.i-tbl td{padding:3.5pt 6pt;border:1pt solid #cdd5e0;font-size:8.5pt;vertical-align:middle}
+.i-tbl tbody tr:nth-child(even) td{background:var(--isky)}
+.tc{text-align:center}.tr2{text-align:right;font-weight:600}
+.i-tots{border-top:2pt solid var(--ib)}
+.i-tr{display:flex;border-bottom:1pt solid #cdd5e0;align-items:stretch}
+.i-tr:last-child{border-bottom:none}
+.i-tl{flex:1;padding:3.5pt 10pt;font-size:8.5pt;font-weight:600;color:var(--ib);display:flex;align-items:center}
+.i-ta{min-width:100pt;padding:3.5pt 10pt;font-size:8.5pt;font-weight:700;text-align:right;border-left:1pt solid #cdd5e0;background:var(--igr);display:flex;align-items:center;justify-content:flex-end}
+.i-tr.hi .i-tl{background:var(--isky)}
+.i-tr.grand .i-tl{background:var(--ib);color:#fff;font-size:9.5pt}
+.i-tr.grand .i-ta{background:var(--ib);color:#fff;font-size:9.5pt}
+.i-figs{border-top:1pt solid #cdd5e0}
+.i-fr{display:flex;border-bottom:1pt solid #cdd5e0;align-items:center}
+.i-fl{min-width:155pt;padding:3.5pt 10pt;font-size:8.5pt;font-weight:700;flex-shrink:0}
+.i-fv{flex:1;padding:3.5pt 10pt;font-size:8.5pt}
+.i-payh{background:var(--ib);color:#fff;padding:3pt 10pt;font-size:8pt;font-weight:700;letter-spacing:1pt}
+.i-pr{display:flex;border-bottom:1pt solid #cdd5e0;align-items:center}
+.i-pr:nth-child(even){background:var(--isky)}
+.i-prll{min-width:90pt;padding:3.5pt 10pt;font-size:8pt;font-weight:700;color:var(--ib);flex-shrink:0}
+.i-prv{flex:1;padding:3.5pt 10pt;font-size:8.5pt}
+.i-sig{display:grid;grid-template-columns:1fr 1fr;border-top:1pt solid #cdd5e0}
+.i-sl{padding:22pt 10pt 8pt;text-align:center;font-size:8.5pt;font-weight:700;background:var(--igr);border-right:1pt solid #cdd5e0}
+.i-sr{padding:22pt 10pt 8pt;text-align:center;font-size:8.5pt;font-weight:700;background:var(--isky)}
+.i-foot{text-align:center;padding:6pt;font-size:7.5pt;color:#666;background:#f8f9fb;border-top:1pt solid #cdd5e0}
+</style>
+</head>
+<body>
+
+<!-- BAR -->
+<div class="bar">
+  <div class="bar-logo">
+    <div class="ico">🧾</div>
+    <div><h1>Invoice Builder</h1><small>RIDHI ENTERPRISE</small></div>
+  </div>
+  <div class="bar-sep"></div>
+  <div class="bar-kpis">
+    <div class="kpi"><div class="l">Taxable</div><div class="v" id="hd_t">₹0</div></div>
+    <div class="kpi"><div class="l">GST</div><div class="v" id="hd_g">₹0</div></div>
+    <div class="kpi"><div class="l">Grand Total</div><div class="v g" id="hd_grand">₹0</div></div>
+  </div>
+  <button class="xbtn btn-rst" onclick="resetAll()">↺ Reset</button>
+  <button class="xbtn btn-pdf" onclick="download('pdf')">⬇ PDF</button>
+  <button class="xbtn btn-xl"  onclick="download('xlsx')">⬇ Excel</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on" id="tab_edit" onclick="showTab('edit')">✏️ Invoice Editor</div>
+  <div class="tab" id="tab_api"  onclick="showTab('api')">⚡ API Docs</div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main_edit">
+
+  <!-- EDITOR -->
+  <div class="ed">
+
+    <!-- Supplier -->
+    <div class="sec on" id="s_sup">
+      <div class="sec-hd" onclick="tog('s_sup')">
+        <div class="sec-ico" style="background:#dbeafe">🏢</div>
+        <span class="sec-ttl">Supplier Details</span><span class="sec-arr">▶</span>
+      </div>
+      <div class="sec-body">
+        <div class="fg"><label class="fl">Company Name</label><input class="fi" id="sup_name" value="RIDHI ENTERPRISE" oninput="render()"></div>
+        <div class="gr2">
+          <div class="fg"><label class="fl">GSTIN</label><input class="fi" id="sup_gstin" value="24CWXPN3536P1ZK" oninput="render()" style="font-size:11px"></div>
+          <div class="fg"><label class="fl">PAN</label><input class="fi" id="sup_pan" value="CWXPN3536P" oninput="render()"></div>
+        </div>
+        <div class="fg"><label class="fl">Billing Address</label><textarea class="fi" id="sup_addr" rows="2" oninput="render()" style="resize:vertical;font-size:11.5px">1217,S. No.71,B/H NAVJIVAN HOTEL GODHRA ROAD , MAGHASAR HALOL – Panchmahal Gujarat-389350</textarea></div>
+      </div>
+    </div>
+
+    <!-- Receiver -->
+    <div class="sec on" id="s_rec">
+      <div class="sec-hd" onclick="tog('s_rec')">
+        <div class="sec-ico" style="background:#dcfce7">🏭</div>
+        <span class="sec-ttl">Receiver / Client</span><span class="sec-arr">▶</span>
+      </div>
+      <div class="sec-body">
+        <div class="fg"><label class="fl">Company Name</label><input class="fi" id="rec_name" value="GR AGRO INDUSTRIES" oninput="render()"></div>
+        <div class="fg"><label class="fl">GSTIN</label><input class="fi" id="rec_gstin" value="24HAYPP3387L1ZK" oninput="render()" style="font-size:11px"></div>
+        <div class="fg"><label class="fl">Service Period</label><input class="fi" id="rec_period" value="01/02/2026 to 28/02/2026" oninput="render()"></div>
+      </div>
+    </div>
+
+    <!-- Invoice Info -->
+    <div class="sec on" id="s_inv">
+      <div class="sec-hd" onclick="tog('s_inv')">
+        <div class="sec-ico" style="background:#fef9c3">📋</div>
+        <span class="sec-ttl">Invoice Info</span><span class="sec-arr">▶</span>
+      </div>
+      <div class="sec-body">
+        <div class="gr3">
+          <div class="fg"><label class="fl">Invoice No.</label><input class="fi" id="inv_no" value="RE-38" oninput="render()"></div>
+          <div class="fg"><label class="fl">Date</label><input class="fi" id="inv_date" value="05-03-2026" oninput="render()"></div>
+          <div class="fg"><label class="fl">Place of Supply</label><input class="fi" id="inv_pos" value="GUJARAT (24)" oninput="render()" style="font-size:11px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="sec on" id="s_items">
+      <div class="sec-hd" onclick="tog('s_items')">
+        <div class="sec-ico" style="background:#ede9fe">📦</div>
+        <span class="sec-ttl">Line Items</span><span class="sec-badge" id="row_ct">6 rows</span><span class="sec-arr">▶</span>
+      </div>
+      <div class="sec-body">
+        <div class="items-wrap"><table class="it">
+          <thead><tr>
+            <th>#</th><th style="text-align:left;min-width:110px">Description</th>
+            <th style="min-width:56px">Rate/Head</th><th style="min-width:52px">Persons</th>
+            <th style="min-width:38px">Days</th><th style="min-width:74px">Amount</th><th></th>
+          </tr></thead>
+          <tbody id="itbody"></tbody>
+        </table></div>
+        <button class="add-b" onclick="addRow()">＋ Add Line Item</button>
+        <div class="s-tots">
+          <div class="st-r"><span class="st-l">Taxable Amount</span><span class="st-v" id="st_tax">₹ 0.00</span></div>
+          <div class="st-r"><span class="st-l">Service Charge</span><span class="st-v" id="st_svc">₹ 0.00</span></div>
+          <div class="st-r"><span class="st-l">Subtotal (before GST)</span><span class="st-v" id="st_sub">₹ 0.00</span></div>
+          <div class="st-r"><span class="st-l">CGST</span><span class="st-v" id="st_cg">₹ 0.00</span></div>
+          <div class="st-r"><span class="st-l">SGST</span><span class="st-v" id="st_sg">₹ 0.00</span></div>
+          <div class="st-r grand"><span class="st-l">Grand Total</span><span class="st-v" id="st_grand">₹ 0.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax -->
+    <div class="sec on" id="s_tax">
+      <div class="sec-hd" onclick="tog('s_tax')">
+        <div class="sec-ico" style="background:#fee2e2">🧮</div>
+        <span class="sec-ttl">Tax & Charges</span><span class="sec-arr">▶</span>
+      </div>
+      <div class="sec-body">
+        <div class="tax-g">
+          <div class="tax-c"><label class="fl">Svc Charge %</label><input class="tax-i" type="number" id="svc_pct" value="5" min="0" max="100" step="0.5" oninput="render()"></div>
+          <div class="tax-c"><label class="fl">CGST %</label><input class="tax-i" type="number" id="cgst_pct" value="9" min="0" max="28" step="0.5" oninput="render()"></div>
+          <div class="tax-c"><label class="fl">SGST %</label><input class="tax-i" type="number" id="sgst_pct" value="9" min="0" max="28" step="0.5" oninput="render()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="sec on" id="s_pay">
+      <div class="sec-hd" onclick="tog('s_pay')">
+        <div class="sec-ico" style="background:#d1fae5">🏦</div>
+        <span class="sec-ttl">Payment Details</span><span class="sec-arr">▶</span>
+      </div>
+      <div class="sec-body">
+        <div class="fg"><label class="fl">In Favour Of</label><input class="fi" id="pay_fav" value="RIDHI ENTERPRISE" oninput="render()"></div>
+        <div class="fg"><label class="fl">Bank & Branch</label><input class="fi" id="pay_bank" value="PUNJAB NATIONAL BANK HALOL" oninput="render()"></div>
+        <div class="gr2">
+          <div class="fg"><label class="fl">Account No.</label><input class="fi" id="pay_acc" value="19000202100001031" oninput="render()" style="font-size:11px"></div>
+          <div class="fg"><label class="fl">IFSC Code</label><input class="fi" id="pay_ifsc" value="PUNB0190020" oninput="render()"></div>
+        </div>
+        <div class="fg"><label class="fl">Comments</label><input class="fi" id="pay_cmts" value="RIDHI ENTERPRISE" oninput="render()"></div>
+        <div class="fg"><label class="fl">Footer / Email</label><input class="fi" id="footer_txt" value="Sunencalv | NEAR LIC HALOL-389350 (GUJARAT) | E-mail: ridhienterprise10@gmail.com" oninput="render()" style="font-size:11px"></div>
+      </div>
+    </div>
+
+    <!-- DOWNLOAD -->
+    <div class="dl-panel">
+      <div class="dl-panel-title">⬇ Download Invoice</div>
+      <div class="dl-btns">
+        <button class="dl-btn dl-pdf" id="dl_pdf" onclick="download('pdf')">📄 Download PDF</button>
+        <button class="dl-btn dl-xl"  id="dl_xl"  onclick="download('xlsx')">📊 Download Excel</button>
+      </div>
+    </div>
+    <div style="height:8px"></div>
+  </div><!-- .ed -->
+
+  <!-- PREVIEW -->
+  <div class="preview-wrap">
+    <div>
+      <p class="preview-lbl">Live Preview &nbsp;·&nbsp; Use buttons to download PDF or Excel</p>
+      <div id="inv_preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- API PANEL -->
+<div class="api-panel" id="api_panel">
+  <div class="api-card">
+    <h2>⚡ Invoice Generator API</h2>
+    <p>Send invoice data as JSON, get back a real PDF or Excel file. All fields are optional — unset ones auto-fill from RIDHI ENTERPRISE defaults.</p>
+    <div id="base_url_badge" class="base-url-badge">🌐 <span id="base_url_txt">http://localhost:3000</span></div>
+    <div class="ep-row"><span class="method GET">GET</span><span class="endpoint">/api</span><span class="ep-desc" style="margin-left:8px">Full API docs</span></div>
+    <div class="ep-row"><span class="method GET">GET</span><span class="endpoint">/api/health</span><span class="ep-desc" style="margin-left:8px">Health check</span></div>
+    <div class="ep-row"><span class="method GET">GET</span><span class="endpoint">/api/defaults</span><span class="ep-desc" style="margin-left:8px">View all default field values</span></div>
+    <div class="ep-row"><span class="method POST">POST</span><span class="endpoint">/api/invoice/pdf</span><span class="ep-desc" style="margin-left:8px">Returns a PDF file <span class="badge">Main</span></span></div>
+    <div class="ep-row"><span class="method POST">POST</span><span class="endpoint">/api/invoice/xlsx</span><span class="ep-desc" style="margin-left:8px">Returns an Excel (.xlsx) file <span class="badge">Main</span></span></div>
+    <div class="ep-row"><span class="method POST">POST</span><span class="endpoint">/api/invoice/json</span><span class="ep-desc" style="margin-left:8px">Returns calculated totals as JSON</span></div>
+  </div>
+
+  <div class="api-card">
+    <h2>🟦 JavaScript / fetch</h2>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">const</span> BASE = <span class="str" id="js_base">"http://localhost:3000"</span>;
+
+<span class="cm">// ── Download PDF ──────────────────────────────</span>
+<span class="kw">async function</span> downloadInvoicePDF(invoiceData) {
+  <span class="kw">const</span> res = <span class="kw">await</span> fetch(`${BASE}/api/invoice/pdf`, {
+    method: <span class="str">"POST"</span>,
+    headers: { <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },
+    body: JSON.stringify(invoiceData)
+  });
+  <span class="kw">const</span> blob = <span class="kw">await</span> res.blob();
+  <span class="kw">const</span> url  = URL.createObjectURL(blob);
+  Object.assign(document.createElement(<span class="str">"a"</span>),
+    { href: url, download: <span class="str">"invoice.pdf"</span> }).click();
+}
+
+<span class="cm">// ── Download Excel ────────────────────────────</span>
+<span class="kw">async function</span> downloadInvoiceXLSX(invoiceData) {
+  <span class="kw">const</span> res = <span class="kw">await</span> fetch(`${BASE}/api/invoice/xlsx`, {
+    method: <span class="str">"POST"</span>,
+    headers: { <span class="str">"Content-Type"</span>: <span class="str">"application/json"</span> },
+    body: JSON.stringify(invoiceData)
+  });
+  <span class="kw">const</span> blob = <span class="kw">await</span> res.blob();
+  <span class="kw">const</span> url  = URL.createObjectURL(blob);
+  Object.assign(document.createElement(<span class="str">"a"</span>),
+    { href: url, download: <span class="str">"invoice.xlsx"</span> }).click();
+}
+
+<span class="cm">// ── Usage ─────────────────────────────────────</span>
+downloadInvoicePDF({
+  invoiceNo:    <span class="str">"RE-39"</span>,
+  invoiceDate:  <span class="str">"01-04-2026"</span>,
+  receiverName: <span class="str">"NEW CLIENT INDUSTRIES"</span>,
+  period:       <span class="str">"01/03/2026 to 31/03/2026"</span>,
+  items: [
+    { desc: <span class="str">"Loading /Unloading"</span>, rate: <span class="num">500</span>, persons: <span class="num">200</span>, days: <span class="num">1</span> }
+  ]
+});</div>
+  </div>
+
+  <div class="api-card">
+    <h2>🐍 Python</h2>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="kw">import</span> requests
+
+BASE = <span class="str" id="py_base">"http://localhost:3000"</span>
+payload = {
+    <span class="str">"invoiceNo"</span>:    <span class="str">"RE-39"</span>,
+    <span class="str">"invoiceDate"</span>:  <span class="str">"01-04-2026"</span>,
+    <span class="str">"receiverName"</span>: <span class="str">"NEW CLIENT INDUSTRIES"</span>,
+    <span class="str">"items"</span>: [
+        { <span class="str">"desc"</span>: <span class="str">"Loading /Unloading"</span>, <span class="str">"rate"</span>: <span class="num">500</span>, <span class="str">"persons"</span>: <span class="num">200</span>, <span class="str">"days"</span>: <span class="num">1</span> }
+    ]
+}
+<span class="cm"># Save PDF</span>
+r = requests.post(f<span class="str">"{BASE}/api/invoice/pdf"</span>, json=payload)
+open(<span class="str">"invoice.pdf"</span>, <span class="str">"wb"</span>).write(r.content)
+
+<span class="cm"># Save Excel</span>
+r = requests.post(f<span class="str">"{BASE}/api/invoice/xlsx"</span>, json=payload)
+open(<span class="str">"invoice.xlsx"</span>, <span class="str">"wb"</span>).write(r.content)
+
+<span class="cm"># Get JSON totals</span>
+data = requests.post(f<span class="str">"{BASE}/api/invoice/json"</span>, json=payload).json()
+<span class="kw">print</span>(data[<span class="str">"totals"</span>][<span class="str">"grandTotal"</span>])       <span class="cm"># 1,15,500</span>
+<span class="kw">print</span>(data[<span class="str">"totals"</span>][<span class="str">"grandTotalWords"</span>])   <span class="cm"># One Lakh Fifteen Thousand...</span></div>
+  </div>
+
+  <div class="api-card">
+    <h2>🔵 cURL</h2>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm"># Download PDF</span>
+curl -X POST <span class="str" id="curl_base">http://localhost:3000</span>/api/invoice/pdf \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"invoiceNo":"RE-39","items":[{"desc":"Labour","rate":400,"persons":100,"days":1}]}'</span> \
+  --output invoice.pdf
+
+<span class="cm"># Download Excel</span>
+curl -X POST <span class="str">http://localhost:3000</span>/api/invoice/xlsx \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"invoiceNo":"RE-39","items":[{"desc":"Labour","rate":400,"persons":100,"days":1}]}'</span> \
+  --output invoice.xlsx</div>
+  </div>
+
+  <div class="api-card">
+    <h2>🚀 Free Hosting on Render.com</h2>
+    <p>Deploy in 5 minutes for free. Render's free tier supports Node.js with no credit card required.</p>
+    <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copy</button><span class="cm"># 1. Push project to GitHub:</span>
+git init && git add . && git commit -m <span class="str">"init"</span>
+git remote add origin https://github.com/YOUR_USER/invoice-api.git
+git push -u origin main
+
+<span class="cm"># 2. On render.com:</span>
+<span class="cm">#    → New → Web Service → connect GitHub repo</span>
+<span class="cm">#    → Build Command:  npm install</span>
+<span class="cm">#    → Start Command:  node server.js</span>
+<span class="cm">#    → Select "Free" plan → Deploy!</span>
+
+<span class="cm"># 3. Your live API URL will be:</span>
+<span class="cm">#    https://your-app-name.onrender.com/api/invoice/pdf</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+const API_BASE = window.location.origin; // auto-detects local or hosted
+document.querySelectorAll('#js_base,#py_base').forEach(el => el.textContent = `"${API_BASE}"`);
+document.querySelector('#curl_base').textContent = API_BASE;
+document.querySelector('#base_url_txt').textContent = API_BASE;
+
+// ── Data ─────────────────────────────────────────────────────────────────────
+let rows=[
+  {desc:"Loading /Unloading",rate:400,persons:245,days:""},
+  {desc:"Loading /Unloading",rate:"",persons:"",days:""},
+  {desc:"Skill",rate:"",persons:"",days:""},
+  {desc:"Provident Fund@13%",rate:"",persons:"",days:""},
+  {desc:"ESIC@3.25%",rate:"",persons:"",days:""},
+  {desc:"Bonus",rate:"",persons:"",days:""},
+];
+const DR=JSON.parse(JSON.stringify(rows));
+const DV={sup_name:"RIDHI ENTERPRISE",sup_gstin:"24CWXPN3536P1ZK",sup_pan:"CWXPN3536P",
+  sup_addr:"1217,S. No.71,B/H NAVJIVAN HOTEL GODHRA ROAD , MAGHASAR HALOL – Panchmahal Gujarat-389350",
+  rec_name:"GR AGRO INDUSTRIES",rec_gstin:"24HAYPP3387L1ZK",rec_period:"01/02/2026 to 28/02/2026",
+  inv_no:"RE-38",inv_date:"05-03-2026",inv_pos:"GUJARAT (24)",svc_pct:"5",cgst_pct:"9",sgst_pct:"9",
+  pay_fav:"RIDHI ENTERPRISE",pay_bank:"PUNJAB NATIONAL BANK HALOL",pay_acc:"19000202100001031",
+  pay_ifsc:"PUNB0190020",pay_cmts:"RIDHI ENTERPRISE",
+  footer_txt:"Sunencalv | NEAR LIC HALOL-389350 (GUJARAT) | E-mail: ridhienterprise10@gmail.com"};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function tog(id){document.getElementById(id).classList.toggle('on')}
+function g(id){return document.getElementById(id)?.value||""}
+function showTab(t){
+  ['edit','api'].forEach(n=>{
+    document.getElementById('tab_'+n).classList.toggle('on',n===t);
+  });
+  document.getElementById('main_edit').style.display=t==='edit'?'flex':'none';
+  document.getElementById('api_panel').classList.toggle('on',t==='api');
+}
+function copyCode(btn){
+  const txt=btn.parentElement.innerText.replace(/^Copy\n?/,'').trim();
+  navigator.clipboard.writeText(txt).then(()=>{btn.textContent='✓ Copied';setTimeout(()=>btn.textContent='Copy',2000)});
+}
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ── Numbers ───────────────────────────────────────────────────────────────────
+function inr(n,d=2){return"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:d,maximumFractionDigits:d})}
+function plain(n,d=2){return Number(n).toLocaleString("en-IN",{minimumFractionDigits:d,maximumFractionDigits:d})}
+function toWords(n){
+  n=Math.round(n);if(!n)return"Zero";
+  const o=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const t=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  const b=x=>x<20?o[x]:t[~~(x/10)]+(x%10?" "+o[x%10]:"");
+  const c=x=>x>=100?o[~~(x/100)]+" Hundred"+(x%100?" "+b(x%100):""):b(x);
+  let r="";
+  if(n>=10000000){r+=c(~~(n/10000000))+" Crore ";n%=10000000}
+  if(n>=100000)  {r+=c(~~(n/100000))+" Lakh ";n%=100000}
+  if(n>=1000)    {r+=c(~~(n/1000))+" Thousand ";n%=1000}
+  if(n>0)        {r+=c(n)}
+  return r.trim();
+}
+
+function calcAmt(r){if(r.rate===""||r.persons==="")return null;return+r.rate*+r.persons*(r.days!==""?+r.days:1)}
+function calcTotals(){
+  const s=+g("svc_pct")/100,c=+g("cgst_pct")/100,sg=+g("sgst_pct")/100;
+  let tax=0;rows.forEach(r=>{const a=calcAmt(r);if(a!==null)tax+=a;});
+  const svc=+(tax*s).toFixed(2),sub=+(tax+svc).toFixed(2),cgst=+(sub*c).toFixed(2),sgst=+(sub*sg).toFixed(2);
+  return{tax,svc,sub,cgst,sgst,grand:+(sub+cgst+sgst).toFixed(2)};
+}
+
+// ── Row editor ────────────────────────────────────────────────────────────────
+function renderRows(){
+  const tb=document.getElementById("itbody");tb.innerHTML="";
+  rows.forEach((r,i)=>{
+    const a=calcAmt(r);const tr=document.createElement("tr");
+    tr.innerHTML=`<td class="td-n">${i+1}</td>
+      <td><input class="ti2" value="${r.desc.replace(/"/g,'&quot;')}" placeholder="Description" oninput="rows[${i}].desc=this.value;render()"></td>
+      <td><input class="ti2 ti-n" type="number" value="${r.rate}" placeholder="—" style="width:52px" oninput="rows[${i}].rate=this.value===''?'':+this.value;updA(${i});render()"></td>
+      <td><input class="ti2 ti-n" type="number" value="${r.persons}" placeholder="—" style="width:48px" oninput="rows[${i}].persons=this.value===''?'':+this.value;updA(${i});render()"></td>
+      <td><input class="ti2 ti-n" type="number" value="${r.days}" placeholder="1" style="width:36px" oninput="rows[${i}].days=this.value===''?'':+this.value;updA(${i});render()"></td>
+      <td class="td-a" id="ra_${i}">${a===null?"—":plain(a)}</td>
+      <td class="td-x"><button class="xb" onclick="delRow(${i})">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById("row_ct").textContent=rows.length+(rows.length!==1?" rows":" row");
+}
+function updA(i){const c=document.getElementById(`ra_${i}`);if(c){const a=calcAmt(rows[i]);c.textContent=a===null?"—":plain(a);}}
+function addRow(){rows.push({desc:"New Service",rate:"",persons:"",days:""});renderRows();render();}
+function delRow(i){if(rows.length===1)return;rows.splice(i,1);renderRows();render();}
+
+// ── Render preview ────────────────────────────────────────────────────────────
+function render(){
+  const t=calcTotals();const sp=g("svc_pct"),cp=g("cgst_pct"),gp=g("sgst_pct");
+  document.getElementById("hd_t").textContent=inr(t.tax,0);
+  document.getElementById("hd_g").textContent=inr(t.cgst+t.sgst,0);
+  document.getElementById("hd_grand").textContent=inr(t.grand,0);
+  document.getElementById("st_tax").textContent=inr(t.tax);
+  document.getElementById("st_svc").textContent=inr(t.svc);
+  document.getElementById("st_sub").textContent=inr(t.sub);
+  document.getElementById("st_cg").textContent=inr(t.cgst);
+  document.getElementById("st_sg").textContent=inr(t.sgst);
+  document.getElementById("st_grand").textContent=inr(t.grand);
+  const trs=rows.map((r,i)=>{const a=calcAmt(r);return`<tr>
+    <td class="tc">${i+1}</td><td>${r.desc}</td>
+    <td class="tc">${r.rate!==""?plain(r.rate,0):""}</td>
+    <td class="tc">${r.persons!==""?plain(r.persons,0):""}</td>
+    <td class="tc">${r.days!==""?r.days:""}</td>
+    <td class="tr2">${a!==null?plain(a):""}</td></tr>`;}).join("");
+  document.getElementById("inv_preview").innerHTML=`
+  <div class="inv">
+    <div class="i-title">INVOICE</div><div class="i-orig">ORIGINAL FOR RECIPIENT</div>
+    <div class="i-parties">
+      <div class="i-pty"><div class="i-ph">Supplier</div>
+        <div class="i-pf"><span class="i-pl">Name</span><span class="i-pv">${g("sup_name")}</span></div>
+        <div class="i-pf"><span class="i-pl">GSTIN</span><span class="i-pv">${g("sup_gstin")}</span></div>
+        <div class="i-pf"><span class="i-pl">PAN</span><span class="i-pv">${g("sup_pan")}</span></div>
+        <div class="i-pf" style="margin-top:4pt"><span class="i-pl">Address</span><span class="i-pv" style="font-size:7.5pt">${g("sup_addr")}</span></div>
+      </div>
+      <div class="i-pty"><div class="i-ph">Receiver</div>
+        <div class="i-pf"><span class="i-pl">Name</span><span class="i-pv">${g("rec_name")}</span></div>
+        <div class="i-pf"><span class="i-pl">GSTIN</span><span class="i-pv">${g("rec_gstin")}</span></div>
+        <div class="i-pf"><span class="i-pl">PERIOD</span><span class="i-pv">${g("rec_period")}</span></div>
+      </div>
+    </div>
+    <div class="i-meta">
+      <div class="i-mc"><div class="i-ml">Place of Supply</div><div class="i-mv">${g("inv_pos")}</div></div>
+      <div class="i-mc"><div class="i-ml">Invoice Date</div><div class="i-mv">${g("inv_date")}</div></div>
+      <div class="i-mc"><div class="i-ml">Invoice No.</div><div class="i-mv">${g("inv_no")}</div></div>
+    </div>
+    <table class="i-tbl"><thead><tr>
+      <th style="width:30pt">S.No.</th><th class="tl">Description &amp; SAC Code</th>
+      <th style="width:68pt">Rate/Head</th><th style="width:68pt">No. of Persons</th>
+      <th style="width:34pt">Days</th><th style="width:78pt">Total Amount</th>
+    </tr></thead><tbody>${trs}</tbody></table>
+    <div class="i-tots">
+      <div class="i-tr hi"><div class="i-tl">Total Taxable Amount</div><div class="i-ta">${plain(t.tax)}</div></div>
+      <div class="i-tr"><div class="i-tl">Service Charges @${sp}%</div><div class="i-ta">${plain(t.svc)}</div></div>
+      <div class="i-tr hi"><div class="i-tl">Total</div><div class="i-ta">${plain(t.sub)}</div></div>
+      <div class="i-tr"><div class="i-tl">CGST ${cp}%</div><div class="i-ta">${plain(t.cgst)}</div></div>
+      <div class="i-tr"><div class="i-tl">SGST ${gp}%</div><div class="i-ta">${plain(t.sgst)}</div></div>
+      <div class="i-tr grand"><div class="i-tl">Total Amount</div><div class="i-ta">${plain(t.grand)}</div></div>
+    </div>
+    <div class="i-figs">
+      <div class="i-fr"><div class="i-fl">Total Invoice Value (In Figures)</div><div class="i-fv" style="font-weight:700">${plain(t.grand)}</div></div>
+      <div class="i-fr"><div class="i-fl">Total Invoice Value (In Words)</div><div class="i-fv" style="font-style:italic">${toWords(t.grand)} only</div></div>
+    </div>
+    <div class="i-payh">Payment Terms</div>
+    <div class="i-pr"><div class="i-prll">In favour of</div><div class="i-prv">${g("pay_fav")}</div></div>
+    <div class="i-pr"><div class="i-prll">Bank &amp; Branch</div><div class="i-prv">${g("pay_bank")}</div></div>
+    <div class="i-pr"><div class="i-prll">Account No.</div><div class="i-prv">${g("pay_acc")}</div></div>
+    <div class="i-pr"><div class="i-prll">IFSC Code</div><div class="i-prv">${g("pay_ifsc")}</div></div>
+    <div class="i-pr"><div class="i-prll">Comments</div><div class="i-prv">${g("pay_cmts")}</div></div>
+    <div class="i-sig"><div class="i-sl">Authorised Signatory</div><div class="i-sr">by ${g("sup_name")}</div></div>
+    <div class="i-foot">${g("footer_txt")}</div>
+  </div>`;
+}
+
+// ── Build payload ─────────────────────────────────────────────────────────────
+function buildPayload(){
+  return{
+    supplierName:g("sup_name"),supplierGSTIN:g("sup_gstin"),supplierPAN:g("sup_pan"),
+    supplierAddress:g("sup_addr"),receiverName:g("rec_name"),receiverGSTIN:g("rec_gstin"),
+    period:g("rec_period"),placeOfSupply:g("inv_pos"),invoiceDate:g("inv_date"),
+    invoiceNo:g("inv_no"),svcPct:+g("svc_pct"),cgstPct:+g("cgst_pct"),sgstPct:+g("sgst_pct"),
+    items:rows.map(r=>({desc:r.desc,rate:+r.rate||0,persons:+r.persons||0,days:+r.days||0})),
+    payFavour:g("pay_fav"),bankBranch:g("pay_bank"),accountNo:g("pay_acc"),
+    ifscCode:g("pay_ifsc"),comments:g("pay_cmts"),footerText:g("footer_txt"),
+  };
+}
+
+// ── Download via API ──────────────────────────────────────────────────────────
+async function download(fmt){
+  const btn=document.getElementById(fmt==='pdf'?'dl_pdf':'dl_xl');
+  btn.textContent=`⏳ Generating…`;btn.classList.add('loading');
+  toast(`Generating ${fmt.toUpperCase()}…`,'info');
+  try{
+    const res=await fetch(`${API_BASE}/api/invoice/${fmt}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(buildPayload())
+    });
+    if(!res.ok) throw new Error((await res.json()).error||'Server error');
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const inv_no=g("inv_no")||"draft";
+    Object.assign(document.createElement('a'),{href:url,download:`invoice-${inv_no}.${fmt}`}).click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    toast(`✓ ${fmt.toUpperCase()} downloaded!`,'ok');
+  }catch(e){
+    toast(`Error: ${e.message}`,'err');
+    console.error(e);
+  }finally{
+    btn.textContent=fmt==='pdf'?'📄 Download PDF':'📊 Download Excel';
+    btn.classList.remove('loading');
+  }
+}
+
+function resetAll(){
+  if(!confirm("Reset all data to original Invoice RE-38?"))return;
+  rows=JSON.parse(JSON.stringify(DR));
+  Object.entries(DV).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
+  renderRows();render();
+}
+
+renderRows();render();
+</script>
+</body>
+</html>
