@@ -119,10 +119,12 @@ app.post("/api/invoice/json", (req, res) => {
 // ── Fallback to SPA ────────────────────────────────────────────────────────
 app.use((req, res) => res.sendFile(path.join(__dirname, "public", "index.html")));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`\n✅  Invoice API + UI  →  http://localhost:${PORT}`);
-  console.log(`    API docs           →  http://localhost:${PORT}/api\n`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`\n✅  Invoice API + UI  →  http://localhost:${PORT}`);
+    console.log(`    API docs           →  http://localhost:${PORT}/api\n`);
+  });
+}
 
 module.exports = app;
