@@ -248,7 +248,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
       </div>
       <div class="sec-body">
         <div class="gr3">
-          <div class="fg"><label class="fl">Invoice No.</label><input class="fi" id="inv_no" value="RE-38" oninput="render()"></div>
+          <div class="fg"><label class="fl">Invoice No.</label><input class="fi" id="inv_no" value="KE-38" oninput="render()"></div>
           <div class="fg"><label class="fl">Date</label><input class="fi" id="inv_date" value="05-03-2026" oninput="render()"></div>
           <div class="fg"><label class="fl">Place of Supply</label><input class="fi" id="inv_pos" value="GUJARAT (24)" oninput="render()" style="font-size:11px"></div>
         </div>
@@ -474,7 +474,7 @@ const DR=JSON.parse(JSON.stringify(rows));
 const DV={sup_name:"KISHAN ENTERPRISE",sup_gstin:"24EXJPR5313F1ZG",sup_pan:"EXJPR5313F",
   sup_addr:"Rameshwar Nagar, Godhra Road, Halol, Panchmahal, Gujarat - 389350",
   rec_name:"GR AGRO INDUSTRIES",rec_gstin:"24HAYPP3387L1ZK",rec_period:"01/02/2026 to 28/02/2026",
-  inv_no:"RE-38",inv_date:"05-03-2026",inv_pos:"GUJARAT (24)",svc_pct:"5",cgst_pct:"9",sgst_pct:"9",
+  inv_no:"KE-38",inv_date:"05-03-2026",inv_pos:"GUJARAT (24)",svc_pct:"5",cgst_pct:"9",sgst_pct:"9",
   pay_fav:"KISHAN ENTERPRISE",pay_bank:"HDFC BANK",pay_acc:"50200119219082",
   pay_ifsc:"HDFC0000954",pay_cmts:"KISHAN ENTERPRISE",
   footer_txt:"Rameshwar Nagar, Godhra Road, Halol | E-mail: makwanarajesh822@gmail.com"};
@@ -651,7 +651,7 @@ async function download(fmt){
 }
 
 function resetAll(){
-  if(!confirm("Reset all data to original Invoice RE-38?"))return;
+  if(!confirm("Reset all data to original Invoice KE-38?"))return;
   rows=JSON.parse(JSON.stringify(DR));
   Object.entries(DV).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});
   renderRows();render();
