@@ -201,7 +201,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
 .c-table .right{text-align:right}
 .c-table .total-label{font-weight:700}
 .c-words{border:1.5px solid #111;border-top:none;padding:6pt 10pt;font-size:9.5pt;font-weight:700}
-.c-words span{font-weight:700}
 .c-foot{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #111;border-top:none;min-height:80pt}
 .c-foot-left{padding:10pt;font-size:9.5pt;font-weight:700;line-height:1.6}
 .c-foot-right{padding:10pt;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;font-weight:700}
@@ -518,6 +517,7 @@ const DV={sup_name:"KISHAN ENTERPRISE",sup_gstin:"24EXJPR5313F1ZG",sup_pan:"EXJP
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function tog(id){document.getElementById(id).classList.toggle('on')}
 function g(id){return document.getElementById(id)?.value||""}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 function showTab(t){
   ['edit','api'].forEach(n=>{
     document.getElementById('tab_'+n).classList.toggle('on',n===t);
@@ -603,12 +603,28 @@ function render(){
     <td class="tr2">${a!==null?plain(a):""}</td></tr>`;}).join("");
   if(isClassic){
     const recAddr=g("rec_addr").trim();
-    const recAddrHtml=recAddr?recAddr.replace(/\n/g,"<br>")+"<br>":"";
+    const recAddrHtml=recAddr?esc(recAddr).replace(/\n/g,"<br>")+"<br>":"";
+    const safeSupName=esc(g("sup_name"));
+    const safeSupAddr=esc(g("sup_addr"));
+    const safeSupGst=esc(g("sup_gstin"));
+    const safeSupPan=esc(g("sup_pan"));
+    const safeRecName=esc(g("rec_name"));
+    const safeRecGst=esc(g("rec_gstin"));
+    const safeInvNo=esc(g("inv_no"));
+    const safeInvDate=esc(g("inv_date"));
+    const safePeriod=esc(g("rec_period"));
+    const safeWords=esc(toWords(t.grand).toUpperCase()+" ONLY");
+    const classicQty=r=>{
+      const persons=r.persons!==""?+r.persons:0;
+      if(!persons)return"";
+      const days=r.days!==""?+r.days:1;
+      return persons*(days||1);
+    };
     const classicRows=rows.map((r)=>{
       const a=calcAmt(r);
-      const qty=r.persons!==""&&+r.persons?+r.persons*(r.days!==""&&+r.days?+r.days:1):"";
+      const qty=classicQty(r);
       return`<tr>
-        <td class="left">${r.desc||""}</td>
+        <td class="left">${esc(r.desc||"")}</td>
         <td class="center">${qty!==""?plain(qty,0):""}</td>
         <td class="right">${r.rate!==""&&+r.rate?plain(r.rate,2):""}</td>
         <td class="right">${a!==null&&a?plain(a,0):""}</td>
@@ -627,23 +643,23 @@ function render(){
     document.getElementById("inv_preview").innerHTML=`
     <div class="c-inv">
       <div class="c-head">
-        <div class="c-title">${g("sup_name")}</div>
+        <div class="c-title">${safeSupName}</div>
         <div class="c-head-right">
-          <div>${g("sup_addr")}</div>
-          <div>G.S.T No: ${g("sup_gstin")}</div>
+          <div>${safeSupAddr}</div>
+          <div>G.S.T No: ${safeSupGst}</div>
         </div>
       </div>
       <div class="c-section">
         <div class="c-to">
           <div class="lbl">TO:</div>
-          <div style="font-weight:700">${g("rec_name")}</div>
+          <div style="font-weight:700">${safeRecName}</div>
           ${recAddrHtml}
-          <div class="gst">GST NO : ${g("rec_gstin")}</div>
+          <div class="gst">GST NO : ${safeRecGst}</div>
         </div>
         <div class="c-bill">
-          <div><span class="lbl">BILL NO:</span> ${g("inv_no")}</div>
-          <div><span class="lbl">BILL DATE :</span> ${g("inv_date")}</div>
-          <div><span class="lbl">Bill for the month of :</span> ${g("rec_period")}</div>
+          <div><span class="lbl">BILL NO:</span> ${safeInvNo}</div>
+          <div><span class="lbl">BILL DATE :</span> ${safeInvDate}</div>
+          <div><span class="lbl">Bill for the month of :</span> ${safePeriod}</div>
         </div>
       </div>
       <table class="c-table">
@@ -656,16 +672,16 @@ function render(){
           ${totalRows}
         </tbody>
       </table>
-      <div class="c-words"><span>Rupees in Words:</span> ${toWords(t.grand).toUpperCase()} ONLY</div>
+      <div class="c-words"><span>Rupees in Words:</span> ${safeWords}</div>
       <div class="c-foot">
         <div class="c-foot-left">
-          <div>PAN: ${g("sup_pan")}</div>
+          <div>PAN: ${safeSupPan}</div>
           <div>P.TAX NO : </div>
-          <div>GST NO : ${g("sup_gstin")}</div>
+          <div>GST NO : ${safeSupGst}</div>
           <div>STATE CODE : ${stateCode}</div>
         </div>
         <div class="c-foot-right">
-          <div>For ${g("sup_name")}</div>
+          <div>For ${safeSupName}</div>
           <small>Authorized signatory</small>
         </div>
       </div>
