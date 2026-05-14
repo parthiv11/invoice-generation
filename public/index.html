@@ -190,6 +190,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
 .c-section{display:grid;grid-template-columns:1.1fr .9fr;border-bottom:1.5px solid #111}
 .c-to{padding:8pt 10pt;border-right:1.5px solid #111;font-size:9.5pt;line-height:1.35}
 .c-to .lbl{font-weight:700;margin-bottom:3pt}
+.c-to .addr{white-space:pre-line}
 .c-to .gst{margin-top:3pt;font-weight:700}
 .c-bill{padding:8pt 10pt;font-size:9.5pt;line-height:1.6}
 .c-bill .lbl{font-weight:700}
@@ -263,7 +264,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
       <div class="sec-body">
         <div class="fg"><label class="fl">Company Name</label><input class="fi" id="rec_name" value="GR AGRO INDUSTRIES" oninput="render()"></div>
         <div class="fg"><label class="fl">GSTIN</label><input class="fi" id="rec_gstin" value="24HAYPP3387L1ZK" oninput="render()" style="font-size:11px"></div>
-        <div class="fg"><label class="fl">Billing Address</label><textarea class="fi" id="rec_addr" rows="2" oninput="render()" style="resize:vertical;font-size:11.5px"></textarea></div>
+        <div class="fg"><label class="fl">Receiver Address</label><textarea class="fi" id="rec_addr" rows="2" oninput="render()" style="resize:vertical;font-size:11.5px"></textarea></div>
         <div class="fg"><label class="fl">Service Period</label><input class="fi" id="rec_period" value="01/02/2026 to 28/02/2026" oninput="render()"></div>
       </div>
     </div>
@@ -517,7 +518,6 @@ const DV={sup_name:"KISHAN ENTERPRISE",sup_gstin:"24EXJPR5313F1ZG",sup_pan:"EXJP
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function tog(id){document.getElementById(id).classList.toggle('on')}
 function g(id){return document.getElementById(id)?.value||""}
-function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
 function showTab(t){
   ['edit','api'].forEach(n=>{
     document.getElementById('tab_'+n).classList.toggle('on',n===t);
@@ -603,63 +603,34 @@ function render(){
     <td class="tr2">${a!==null?plain(a):""}</td></tr>`;}).join("");
   if(isClassic){
     const recAddr=g("rec_addr").trim();
-    const recAddrHtml=recAddr?esc(recAddr).replace(/\n/g,"<br>")+"<br>":"";
-    const safeSupName=esc(g("sup_name"));
-    const safeSupAddr=esc(g("sup_addr"));
-    const safeSupGst=esc(g("sup_gstin"));
-    const safeSupPan=esc(g("sup_pan"));
-    const safeRecName=esc(g("rec_name"));
-    const safeRecGst=esc(g("rec_gstin"));
-    const safeInvNo=esc(g("inv_no"));
-    const safeInvDate=esc(g("inv_date"));
-    const safePeriod=esc(g("rec_period"));
-    const safeWords=esc(toWords(t.grand).toUpperCase()+" ONLY");
     const classicQty=r=>{
       const persons=r.persons!==""?+r.persons:0;
       if(!persons)return"";
       const days=r.days!==""?+r.days:1;
       return persons*(days||1);
     };
-    const classicRows=rows.map((r)=>{
-      const a=calcAmt(r);
-      const qty=classicQty(r);
-      return`<tr>
-        <td class="left">${esc(r.desc||"")}</td>
-        <td class="center">${qty!==""?plain(qty,0):""}</td>
-        <td class="right">${r.rate!==""&&+r.rate?plain(r.rate,2):""}</td>
-        <td class="right">${a!==null&&a?plain(a,0):""}</td>
-      </tr>`;
-    });
-    const fillCt=Math.max(0,6-classicRows.length);
-    for(let i=0;i<fillCt;i++){
-      classicRows.push(`<tr><td class="left">&nbsp;</td><td></td><td></td><td></td></tr>`);
-    }
-    const totalRows=`
-      <tr><td></td><td></td><td class="total-label">TOTAL</td><td class="right">${plain(t.sub,0)}</td></tr>
-      <tr><td></td><td></td><td class="total-label">CGST ${cp}%</td><td class="right">${plain(t.cgst,0)}</td></tr>
-      <tr><td></td><td></td><td class="total-label">SGST ${gp}%</td><td class="right">${plain(t.sgst,0)}</td></tr>
-      <tr><td></td><td></td><td class="total-label">GRAND TOTAL</td><td class="right">${plain(t.grand,0)}</td></tr>`;
     const stateCode=(g("inv_pos").match(/\b(\d{2})\b/)||[])[1]||"";
-    document.getElementById("inv_preview").innerHTML=`
+    const preview=document.getElementById("inv_preview");
+    preview.innerHTML=`
     <div class="c-inv">
       <div class="c-head">
-        <div class="c-title">${safeSupName}</div>
+        <div class="c-title" id="c_sup_name"></div>
         <div class="c-head-right">
-          <div>${safeSupAddr}</div>
-          <div>G.S.T No: ${safeSupGst}</div>
+          <div id="c_sup_addr"></div>
+          <div>G.S.T No: <span id="c_sup_gst"></span></div>
         </div>
       </div>
       <div class="c-section">
         <div class="c-to">
           <div class="lbl">TO:</div>
-          <div style="font-weight:700">${safeRecName}</div>
-          ${recAddrHtml}
-          <div class="gst">GST NO : ${safeRecGst}</div>
+          <div style="font-weight:700" id="c_rec_name"></div>
+          <div class="addr" id="c_rec_addr"></div>
+          <div class="gst">GST NO : <span id="c_rec_gst"></span></div>
         </div>
         <div class="c-bill">
-          <div><span class="lbl">BILL NO:</span> ${safeInvNo}</div>
-          <div><span class="lbl">BILL DATE :</span> ${safeInvDate}</div>
-          <div><span class="lbl">Bill for the month of :</span> ${safePeriod}</div>
+          <div><span class="lbl">BILL NO:</span> <span id="c_inv_no"></span></div>
+          <div><span class="lbl">BILL DATE :</span> <span id="c_inv_date"></span></div>
+          <div><span class="lbl">Bill for the month of :</span> <span id="c_period"></span></div>
         </div>
       </div>
       <table class="c-table">
@@ -667,25 +638,64 @@ function render(){
         <thead>
           <tr><th>Particulars</th><th>Quantity/LTR.</th><th>Rate</th><th>Amount Rs.</th></tr>
         </thead>
-        <tbody>
-          ${classicRows.join("")}
-          ${totalRows}
-        </tbody>
+        <tbody id="c_body"></tbody>
       </table>
-      <div class="c-words"><span>Rupees in Words:</span> ${safeWords}</div>
+      <div class="c-words"><span>Rupees in Words:</span> <span id="c_words"></span></div>
       <div class="c-foot">
         <div class="c-foot-left">
-          <div>PAN: ${safeSupPan}</div>
+          <div>PAN: <span id="c_sup_pan"></span></div>
           <div>P.TAX NO : </div>
-          <div>GST NO : ${safeSupGst}</div>
-          <div>STATE CODE : ${stateCode}</div>
+          <div>GST NO : <span id="c_gst"></span></div>
+          <div>STATE CODE : <span id="c_state"></span></div>
         </div>
         <div class="c-foot-right">
-          <div>For ${safeSupName}</div>
+          <div>For <span id="c_sup_name_2"></span></div>
           <small>Authorized signatory</small>
         </div>
       </div>
     </div>`;
+    document.getElementById("c_sup_name").textContent=g("sup_name");
+    document.getElementById("c_sup_name_2").textContent=g("sup_name");
+    document.getElementById("c_sup_addr").textContent=g("sup_addr");
+    document.getElementById("c_sup_gst").textContent=g("sup_gstin");
+    document.getElementById("c_rec_name").textContent=g("rec_name");
+    document.getElementById("c_rec_addr").textContent=recAddr;
+    document.getElementById("c_rec_gst").textContent=g("rec_gstin");
+    document.getElementById("c_inv_no").textContent=g("inv_no");
+    document.getElementById("c_inv_date").textContent=g("inv_date");
+    document.getElementById("c_period").textContent=g("rec_period");
+    document.getElementById("c_words").textContent=toWords(t.grand).toUpperCase()+" ONLY";
+    document.getElementById("c_sup_pan").textContent=g("sup_pan");
+    document.getElementById("c_gst").textContent=g("sup_gstin");
+    document.getElementById("c_state").textContent=stateCode;
+
+    const tbody=document.getElementById("c_body");
+    const addRow=(vals,classes=[])=>{
+      const tr=document.createElement("tr");
+      vals.forEach((val,i)=>{
+        const td=document.createElement("td");
+        td.textContent=val;
+        if(classes[i]) td.className=classes[i];
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    };
+    rows.forEach(r=>{
+      const a=calcAmt(r);
+      const qty=classicQty(r);
+      addRow(
+        [r.desc||"", qty!==""?plain(qty,0):"", r.rate!==""&&+r.rate?plain(r.rate,2):"", a!==null&&a?plain(a,0):""],
+        ["left","center","right","right"]
+      );
+    });
+    const fillCt=Math.max(0,6-rows.length);
+    for(let i=0;i<fillCt;i++){
+      addRow(["","","",""],["left","","",""]);
+    }
+    addRow(["","","TOTAL",plain(t.sub,0)],["","","total-label","right"]);
+    addRow(["","","CGST "+cp+"%",plain(t.cgst,0)],["","","total-label","right"]);
+    addRow(["","","SGST "+gp+"%",plain(t.sgst,0)],["","","total-label","right"]);
+    addRow(["","","GRAND TOTAL",plain(t.grand,0)],["","","total-label","right"]);
     return;
   }
   document.getElementById("inv_preview").innerHTML=`
