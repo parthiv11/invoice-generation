@@ -181,6 +181,31 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
 .i-sb.right{background:var(--isky)}
 .i-sbl{padding:6pt 10pt 8pt;text-align:center;font-size:8.5pt;font-weight:700}
 .i-foot{text-align:center;padding:6pt;font-size:7.5pt;color:#666;background:#f8f9fb;border-top:1pt solid #cdd5e0}
+
+/* ─── CLASSIC INVOICE PREVIEW ────────────────── */
+.c-inv{background:#fff;width:720px;min-width:720px;font-family:Arial,Helvetica,sans-serif;font-size:10pt;color:#111;border:1.5px solid #111}
+.c-head{display:flex;gap:8pt;padding:8pt 10pt;border-bottom:1.5px solid #111}
+.c-title{font-size:24pt;font-weight:700;letter-spacing:2pt}
+.c-head-right{margin-left:auto;text-align:right;font-size:9.5pt;line-height:1.3;font-weight:600;max-width:240pt}
+.c-section{display:grid;grid-template-columns:1.1fr .9fr;border-bottom:1.5px solid #111}
+.c-to{padding:8pt 10pt;border-right:1.5px solid #111;font-size:9.5pt;line-height:1.35}
+.c-to .lbl{font-weight:700;margin-bottom:3pt}
+.c-to .gst{margin-top:3pt;font-weight:700}
+.c-bill{padding:8pt 10pt;font-size:9.5pt;line-height:1.6}
+.c-bill .lbl{font-weight:700}
+.c-table{width:100%;border-collapse:collapse;font-size:9.5pt}
+.c-table th,.c-table td{border:1px solid #111;padding:6pt 6pt}
+.c-table th{text-align:center;font-weight:700}
+.c-table .left{text-align:left}
+.c-table .center{text-align:center}
+.c-table .right{text-align:right}
+.c-table .total-label{font-weight:700}
+.c-words{border:1.5px solid #111;border-top:none;padding:6pt 10pt;font-size:9.5pt;font-weight:700}
+.c-words span{font-weight:700}
+.c-foot{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #111;border-top:none;min-height:80pt}
+.c-foot-left{padding:10pt;font-size:9.5pt;font-weight:700;line-height:1.6}
+.c-foot-right{padding:10pt;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;font-weight:700}
+.c-foot-right small{font-weight:600;font-size:9pt}
 </style>
 </head>
 <body>
@@ -239,6 +264,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
       <div class="sec-body">
         <div class="fg"><label class="fl">Company Name</label><input class="fi" id="rec_name" value="GR AGRO INDUSTRIES" oninput="render()"></div>
         <div class="fg"><label class="fl">GSTIN</label><input class="fi" id="rec_gstin" value="24HAYPP3387L1ZK" oninput="render()" style="font-size:11px"></div>
+        <div class="fg"><label class="fl">Billing Address</label><textarea class="fi" id="rec_addr" rows="2" oninput="render()" style="resize:vertical;font-size:11.5px"></textarea></div>
         <div class="fg"><label class="fl">Service Period</label><input class="fi" id="rec_period" value="01/02/2026 to 28/02/2026" oninput="render()"></div>
       </div>
     </div>
@@ -483,7 +509,7 @@ let rows=[
 const DR=JSON.parse(JSON.stringify(rows));
 const DV={sup_name:"KISHAN ENTERPRISE",sup_gstin:"24EXJPR5313F1ZG",sup_pan:"EXJPR5313F",
   sup_addr:"Rameshwar Nagar, Godhra Road, Halol, Panchmahal, Gujarat - 389350",
-  rec_name:"GR AGRO INDUSTRIES",rec_gstin:"24HAYPP3387L1ZK",rec_period:"01/02/2026 to 28/02/2026",
+  rec_name:"GR AGRO INDUSTRIES",rec_gstin:"24HAYPP3387L1ZK",rec_addr:"",rec_period:"01/02/2026 to 28/02/2026",
   inv_no:"KE-38",inv_date:"05-03-2026",inv_pos:"GUJARAT (24)",bill_variant:"modern",svc_pct:"5",cgst_pct:"9",sgst_pct:"9",
   pay_fav:"KISHAN ENTERPRISE",pay_bank:"HDFC BANK",pay_acc:"50200119219082",
   pay_ifsc:"HDFC0000954",pay_cmts:"KISHAN ENTERPRISE",
@@ -558,8 +584,6 @@ function delRow(i){if(rows.length===1)return;rows.splice(i,1);renderRows();rende
 function render(){
   const t=calcTotals();const sp=g("svc_pct"),cp=g("cgst_pct"),gp=g("sgst_pct");
   const isClassic=g("bill_variant")==="classic";
-  const titleTxt=isClassic?g("sup_name"):"INVOICE";
-  const origTxt=isClassic?"BILL":"ORIGINAL FOR RECIPIENT";
   document.getElementById("hd_t").textContent=inr(t.tax,0);
   document.getElementById("hd_g").textContent=inr(t.cgst+t.sgst,0);
   document.getElementById("hd_grand").textContent=inr(t.grand,0);
@@ -569,12 +593,85 @@ function render(){
   document.getElementById("st_cg").textContent=inr(t.cgst);
   document.getElementById("st_sg").textContent=inr(t.sgst);
   document.getElementById("st_grand").textContent=inr(t.grand);
+  const titleTxt=isClassic?g("sup_name"):"INVOICE";
+  const origTxt=isClassic?"BILL":"ORIGINAL FOR RECIPIENT";
   const trs=rows.map((r,i)=>{const a=calcAmt(r);return`<tr>
     <td class="tc">${i+1}</td><td>${r.desc}</td>
     <td class="tc">${r.rate!==""?plain(r.rate,0):""}</td>
     <td class="tc">${r.persons!==""?plain(r.persons,0):""}</td>
     <td class="tc">${r.days!==""?r.days:""}</td>
     <td class="tr2">${a!==null?plain(a):""}</td></tr>`;}).join("");
+  if(isClassic){
+    const recAddr=g("rec_addr").trim();
+    const recAddrHtml=recAddr?recAddr.replace(/\n/g,"<br>")+"<br>":"";
+    const classicRows=rows.map((r)=>{
+      const a=calcAmt(r);
+      const qty=r.persons!==""&&+r.persons?+r.persons*(r.days!==""&&+r.days?+r.days:1):"";
+      return`<tr>
+        <td class="left">${r.desc||""}</td>
+        <td class="center">${qty!==""?plain(qty,0):""}</td>
+        <td class="right">${r.rate!==""&&+r.rate?plain(r.rate,2):""}</td>
+        <td class="right">${a!==null&&a?plain(a,0):""}</td>
+      </tr>`;
+    });
+    const fillCt=Math.max(0,6-classicRows.length);
+    for(let i=0;i<fillCt;i++){
+      classicRows.push(`<tr><td class="left">&nbsp;</td><td></td><td></td><td></td></tr>`);
+    }
+    const totalRows=`
+      <tr><td></td><td></td><td class="total-label">TOTAL</td><td class="right">${plain(t.sub,0)}</td></tr>
+      <tr><td></td><td></td><td class="total-label">CGST ${cp}%</td><td class="right">${plain(t.cgst,0)}</td></tr>
+      <tr><td></td><td></td><td class="total-label">SGST ${gp}%</td><td class="right">${plain(t.sgst,0)}</td></tr>
+      <tr><td></td><td></td><td class="total-label">GRAND TOTAL</td><td class="right">${plain(t.grand,0)}</td></tr>`;
+    const stateCode=(g("inv_pos").match(/\b(\d{2})\b/)||[])[1]||"";
+    document.getElementById("inv_preview").innerHTML=`
+    <div class="c-inv">
+      <div class="c-head">
+        <div class="c-title">${g("sup_name")}</div>
+        <div class="c-head-right">
+          <div>${g("sup_addr")}</div>
+          <div>G.S.T No: ${g("sup_gstin")}</div>
+        </div>
+      </div>
+      <div class="c-section">
+        <div class="c-to">
+          <div class="lbl">TO:</div>
+          <div style="font-weight:700">${g("rec_name")}</div>
+          ${recAddrHtml}
+          <div class="gst">GST NO : ${g("rec_gstin")}</div>
+        </div>
+        <div class="c-bill">
+          <div><span class="lbl">BILL NO:</span> ${g("inv_no")}</div>
+          <div><span class="lbl">BILL DATE :</span> ${g("inv_date")}</div>
+          <div><span class="lbl">Bill for the month of :</span> ${g("rec_period")}</div>
+        </div>
+      </div>
+      <table class="c-table">
+        <colgroup><col style="width:44%"><col style="width:18%"><col style="width:18%"><col style="width:20%"></colgroup>
+        <thead>
+          <tr><th>Particulars</th><th>Quantity/LTR.</th><th>Rate</th><th>Amount Rs.</th></tr>
+        </thead>
+        <tbody>
+          ${classicRows.join("")}
+          ${totalRows}
+        </tbody>
+      </table>
+      <div class="c-words"><span>Rupees in Words:</span> ${toWords(t.grand).toUpperCase()} ONLY</div>
+      <div class="c-foot">
+        <div class="c-foot-left">
+          <div>PAN: ${g("sup_pan")}</div>
+          <div>P.TAX NO : </div>
+          <div>GST NO : ${g("sup_gstin")}</div>
+          <div>STATE CODE : ${stateCode}</div>
+        </div>
+        <div class="c-foot-right">
+          <div>For ${g("sup_name")}</div>
+          <small>Authorized signatory</small>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
   document.getElementById("inv_preview").innerHTML=`
   <div class="inv">
     <div class="i-title" style="${isClassic?'background:#fff;color:#111;letter-spacing:0':''}">${titleTxt}</div><div class="i-orig" style="${isClassic?'color:#111':''}">${origTxt}</div>
@@ -631,7 +728,7 @@ function render(){
 function buildPayload(){
   return{
     supplierName:g("sup_name"),supplierGSTIN:g("sup_gstin"),supplierPAN:g("sup_pan"),
-    supplierAddress:g("sup_addr"),receiverName:g("rec_name"),receiverGSTIN:g("rec_gstin"),
+    supplierAddress:g("sup_addr"),receiverName:g("rec_name"),receiverAddress:g("rec_addr"),receiverGSTIN:g("rec_gstin"),
     period:g("rec_period"),placeOfSupply:g("inv_pos"),invoiceDate:g("inv_date"),
     invoiceNo:g("inv_no"),billVariant:g("bill_variant"),svcPct:+g("svc_pct"),cgstPct:+g("cgst_pct"),sgstPct:+g("sgst_pct"),
     items:rows.map(r=>({desc:r.desc,rate:+r.rate||0,persons:+r.persons||0,days:+r.days||0})),
