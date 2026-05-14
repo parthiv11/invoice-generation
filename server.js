@@ -26,6 +26,7 @@ app.get("/api", (req, res) => res.json({
   fields: {
     invoiceNo:       "string  — e.g. 'RE-39'",
     invoiceDate:     "string  — e.g. '01-04-2026'",
+    billVariant:     "string  — 'modern' (default) or 'classic'",
     placeOfSupply:   "string",
     supplierName:    "string",
     supplierGSTIN:   "string",

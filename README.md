@@ -2,6 +2,10 @@
 
 Send JSON → Get PDF or Excel invoice. Deployable on Render and Vercel.
 
+Supports `billVariant`:
+- `modern` (default)
+- `classic` (simple bill style)
+
 ## Run locally
 ```bash
 npm install
