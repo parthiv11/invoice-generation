@@ -65,7 +65,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
 .fi:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(30,107,124,.12)}
 .gr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .gr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
-.tax-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:#eef3f8;padding:9px;border-radius:9px;margin-bottom:8px}
+.tax-g{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#eef3f8;padding:9px;border-radius:9px;margin-bottom:8px}
 .tax-c{text-align:center}
 .tax-i{width:100%;padding:7px 4px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:16px;font-weight:600;text-align:center;background:var(--card)}
 .tax-i:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(30,107,124,.12)}
@@ -313,6 +313,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
           <div class="st-r"><span class="st-l">Subtotal (before GST)</span><span class="st-v" id="st_sub">₹ 0.00</span></div>
           <div class="st-r"><span class="st-l">CGST</span><span class="st-v" id="st_cg">₹ 0.00</span></div>
           <div class="st-r"><span class="st-l">SGST</span><span class="st-v" id="st_sg">₹ 0.00</span></div>
+          <div class="st-r"><span class="st-l">Past Balance Due</span><span class="st-v" id="st_past">₹ 0.00</span></div>
           <div class="st-r grand"><span class="st-l">Grand Total</span><span class="st-v" id="st_grand">₹ 0.00</span></div>
         </div>
       </div>
@@ -329,6 +330,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--text);display:flex;fl
           <div class="tax-c"><label class="fl">Svc Charge %</label><input class="tax-i" type="number" id="svc_pct" value="5" min="0" max="100" step="0.5" oninput="render()"></div>
           <div class="tax-c"><label class="fl">CGST %</label><input class="tax-i" type="number" id="cgst_pct" value="9" min="0" max="28" step="0.5" oninput="render()"></div>
           <div class="tax-c"><label class="fl">SGST %</label><input class="tax-i" type="number" id="sgst_pct" value="9" min="0" max="28" step="0.5" oninput="render()"></div>
+          <div class="tax-c"><label class="fl">Past Due ₹</label><input class="tax-i" type="number" id="past_due" value="0" min="0" step="0.01" oninput="render()"></div>
         </div>
       </div>
     </div>
@@ -510,7 +512,7 @@ const DR=JSON.parse(JSON.stringify(rows));
 const DV={sup_name:"KISHAN ENTERPRISE",sup_gstin:"24EXJPR5313F1ZG",sup_pan:"EXJPR5313F",
   sup_addr:"Rameshwar Nagar, Godhra Road, Halol, Panchmahal, Gujarat - 389350",
   rec_name:"GR AGRO INDUSTRIES",rec_gstin:"24HAYPP3387L1ZK",rec_addr:"",rec_period:"01/02/2026 to 28/02/2026",
-  inv_no:"KE-38",inv_date:"05-03-2026",inv_pos:"GUJARAT (24)",bill_variant:"modern",svc_pct:"5",cgst_pct:"9",sgst_pct:"9",
+  inv_no:"KE-38",inv_date:"05-03-2026",inv_pos:"GUJARAT (24)",bill_variant:"modern",svc_pct:"5",cgst_pct:"9",sgst_pct:"9",past_due:"0",
   pay_fav:"KISHAN ENTERPRISE",pay_bank:"HDFC BANK",pay_acc:"50200119219082",
   pay_ifsc:"HDFC0000954",pay_cmts:"KISHAN ENTERPRISE",
   footer_txt:"Rameshwar Nagar, Godhra Road, Halol | E-mail: makwanarajesh822@gmail.com"};
@@ -555,9 +557,10 @@ function toWords(n){
 function calcAmt(r){if(r.rate===""||r.persons==="")return null;return+r.rate*+r.persons*(r.days!==""?+r.days:1)}
 function calcTotals(){
   const s=+g("svc_pct")/100,c=+g("cgst_pct")/100,sg=+g("sgst_pct")/100;
+  const past=+g("past_due")||0;
   let tax=0;rows.forEach(r=>{const a=calcAmt(r);if(a!==null)tax+=a;});
   const svc=+(tax*s).toFixed(2),sub=+(tax+svc).toFixed(2),cgst=+(sub*c).toFixed(2),sgst=+(sub*sg).toFixed(2);
-  return{tax,svc,sub,cgst,sgst,grand:+(sub+cgst+sgst).toFixed(2)};
+  return{tax,svc,sub,cgst,sgst,past,grand:+(sub+cgst+sgst+past).toFixed(2)};
 }
 
 // ── Row editor ────────────────────────────────────────────────────────────────
@@ -592,6 +595,7 @@ function render(){
   document.getElementById("st_sub").textContent=inr(t.sub);
   document.getElementById("st_cg").textContent=inr(t.cgst);
   document.getElementById("st_sg").textContent=inr(t.sgst);
+  document.getElementById("st_past").textContent=inr(t.past);
   document.getElementById("st_grand").textContent=inr(t.grand);
   const titleTxt=isClassic?g("sup_name"):"INVOICE";
   const origTxt=isClassic?"BILL":"ORIGINAL FOR RECIPIENT";
@@ -695,6 +699,7 @@ function render(){
     addRow(["","","TOTAL",plain(t.sub,0)],["","","total-label","right"]);
     addRow(["","","CGST "+cp+"%",plain(t.cgst,0)],["","","total-label","right"]);
     addRow(["","","SGST "+gp+"%",plain(t.sgst,0)],["","","total-label","right"]);
+    addRow(["","","PAST BALANCE DUE",plain(t.past,0)],["","","total-label","right"]);
     addRow(["","","GRAND TOTAL",plain(t.grand,0)],["","","total-label","right"]);
     return;
   }
@@ -727,9 +732,10 @@ function render(){
     <div class="i-tots">
       <div class="i-tr hi"><div class="i-tl">Total Taxable Amount</div><div class="i-ta">${plain(t.tax)}</div></div>
       <div class="i-tr"><div class="i-tl">Service Charges @${sp}%</div><div class="i-ta">${plain(t.svc)}</div></div>
-      <div class="i-tr hi"><div class="i-tl">Total</div><div class="i-ta">${plain(t.sub)}</div></div>
+      <div class="i-tr hi"><div class="i-tl">Total Amount Before Tax</div><div class="i-ta">${plain(t.sub)}</div></div>
       <div class="i-tr"><div class="i-tl">CGST ${cp}%</div><div class="i-ta">${plain(t.cgst)}</div></div>
       <div class="i-tr"><div class="i-tl">SGST ${gp}%</div><div class="i-ta">${plain(t.sgst)}</div></div>
+      <div class="i-tr hi"><div class="i-tl">PAST BALANCE DUE</div><div class="i-ta">${plain(t.past)}</div></div>
       <div class="i-tr grand"><div class="i-tl">Total Amount</div><div class="i-ta">${plain(t.grand)}</div></div>
     </div>
     <div class="i-figs">
@@ -757,6 +763,7 @@ function buildPayload(){
     supplierAddress:g("sup_addr"),receiverName:g("rec_name"),receiverAddress:g("rec_addr"),receiverGSTIN:g("rec_gstin"),
     period:g("rec_period"),placeOfSupply:g("inv_pos"),invoiceDate:g("inv_date"),
     invoiceNo:g("inv_no"),billVariant:g("bill_variant"),svcPct:+g("svc_pct"),cgstPct:+g("cgst_pct"),sgstPct:+g("sgst_pct"),
+    pastBalanceDue:+g("past_due")||0,
     items:rows.map(r=>({desc:r.desc,rate:+r.rate||0,persons:+r.persons||0,days:+r.days||0})),
     payFavour:g("pay_fav"),bankBranch:g("pay_bank"),accountNo:g("pay_acc"),
     ifscCode:g("pay_ifsc"),comments:g("pay_cmts"),footerText:g("footer_txt"),
