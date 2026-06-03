@@ -38,6 +38,7 @@ app.get("/api", (req, res) => res.json({
     svcPct:          "number  — service charge % (default 5)",
     cgstPct:         "number  — CGST % (default 9)",
     sgstPct:         "number  — SGST % (default 9)",
+    pastBalanceDue:  "number  — additional previous balance to include",
     items:           "array   — [{desc, rate, persons, days}]",
     payFavour:       "string",
     bankBranch:      "string",
@@ -100,6 +101,7 @@ app.post("/api/invoice/json", (req, res) => {
         subtotal:        t.sub,
         cgst:            t.cgst,
         sgst:            t.sgst,
+        pastBalanceDue:  t.pastBalanceDue,
         grandTotal:      t.grand,
         grandTotalWords: toWords(t.grand) + " only",
         formatted: {
@@ -108,6 +110,7 @@ app.post("/api/invoice/json", (req, res) => {
           subtotal:      fmtINR(t.sub),
           cgst:          fmtINR(t.cgst),
           sgst:          fmtINR(t.sgst),
+          pastBalanceDue:fmtINR(t.pastBalanceDue),
           grandTotal:    fmtINR(t.grand),
         }
       }
